@@ -73,7 +73,7 @@ class MonitorAdminImpl implements MonitorAdmin {
      */
     public StatusVariable getStatusVariable(String path)
             throws IllegalArgumentException, SecurityException {
-        logVisitor.debug("ENTRY: getStatusVariable: " + path, null);
+        //logVisitor.debug("ENTRY: getStatusVariable: " + path, null);
         try {
             StatusVariablePath statusVariablePath = new StatusVariablePath(path);
             ServiceReference serviceReference = common.findMonitorableReferenceById(statusVariablePath.getMonitorableId());
@@ -82,7 +82,7 @@ class MonitorAdminImpl implements MonitorAdmin {
 
             return common.getStatusVariable(serviceReference, statusVariablePath.getStatusVariableId());
         } finally {
-            logVisitor.debug("EXIT: getStatusVariable: " + path, null);
+            //logVisitor.debug("EXIT: getStatusVariable: " + path, null);
         }
     }
 
@@ -169,7 +169,7 @@ class MonitorAdminImpl implements MonitorAdmin {
      * @return the array of <code>Monitorable</code> names
      */
     public String[] getMonitorableNames() {
-        logVisitor.debug("ENTRY: getMonitorableNames", null);
+        //logVisitor.debug("ENTRY: getMonitorableNames", null);
         try {
             ServiceReference[] serviceReferences = common.getMonitorableReferences();
             SortedSet<String> names = new TreeSet<String>();
@@ -190,7 +190,7 @@ class MonitorAdminImpl implements MonitorAdmin {
             }
             return names.toArray(new String[names.size()]);
         } finally {
-            logVisitor.debug("EXIT: getMonitorableNames", null);
+            //logVisitor.debug("EXIT: getMonitorableNames", null);
         }
     }
 
@@ -252,7 +252,7 @@ class MonitorAdminImpl implements MonitorAdmin {
      */
     public StatusVariable[] getStatusVariables(String monitorableId)
             throws IllegalArgumentException {
-        logVisitor.debug("ENTRY: getStatusVariables: " + monitorableId, null);
+        //logVisitor.debug("ENTRY: getStatusVariables: " + monitorableId, null);
         try {
             List<StatusVariable> result = new ArrayList<StatusVariable>();
 
@@ -272,7 +272,7 @@ class MonitorAdminImpl implements MonitorAdmin {
 
             return result.toArray(new StatusVariable[result.size()]);
         } finally {
-            logVisitor.debug("EXIT: getStatusVariables: " + monitorableId, null);
+            //logVisitor.debug("EXIT: getStatusVariables: " + monitorableId, null);
         }
     }
 
@@ -306,7 +306,7 @@ class MonitorAdminImpl implements MonitorAdmin {
      */
     public String[] getStatusVariableNames(String monitorableId)
             throws IllegalArgumentException {
-        logVisitor.debug("ENTRY: getStatusVariableNames: " + monitorableId, null);
+        //logVisitor.debug("ENTRY: getStatusVariableNames: " + monitorableId, null);
         try {
             Set<String> result = new TreeSet<String>();
 
@@ -320,7 +320,7 @@ class MonitorAdminImpl implements MonitorAdmin {
 
             return result.toArray(new String[result.size()]);
         } finally {
-            logVisitor.debug("EXIT: getStatusVariableNames: " + monitorableId, null);
+            //logVisitor.debug("EXIT: getStatusVariableNames: " + monitorableId, null);
         }
     }
 
@@ -505,16 +505,25 @@ class MonitorAdminImpl implements MonitorAdmin {
                 checkPermissions(new StatusVariablePath(pid, statusVariablePath.getStatusVariableId()), monitorableReference,
                         MonitorPermission.PUBLISH, String.format(STARTJOB_PERMISSION_PATTERN, schedule));
             }
-            ScheduledMonitoringJob job = new ScheduledMonitoringJob(common, logVisitor, initiator,
-                    statusVariables, schedule, count);
-            common.addJob(job);
-            logVisitor.info("New Scheduled Job is started: " + initiator, null);
-            return job;
+            if(initiator.contains(":")){
+                ScheduledMonitoringJob job = new ScheduledMonitoringJob(common, logVisitor, initiator.split(":")[0],
+                        initiator.split(":")[1], statusVariables, schedule, count);
+                common.addJob(job);
+                logVisitor.info("New Scheduled Job is started: " + initiator, null);
+                return job;
+            }
+            else {
+                ScheduledMonitoringJob job = new ScheduledMonitoringJob(common, logVisitor, initiator,
+                        null, statusVariables, schedule, count);
+                common.addJob(job);
+                logVisitor.info("New Scheduled Job is started: " + initiator, null);
+                return job;
+            }
         } finally {
             logVisitor.debug("EXIT: startScheduledJob: " + initiator, null);
         }
     }
-
+    
     /**
      * Starts a change based <code>MonitoringJob</code> with the parameters
      * provided. Monitoring events will be sent when the
@@ -576,17 +585,27 @@ class MonitorAdminImpl implements MonitorAdmin {
                 checkPermissions(new StatusVariablePath(pid, statusVariablePath.getStatusVariableId()), monitorableReference,
                         MonitorPermission.PUBLISH, MonitorPermission.STARTJOB);
             }
-            SubscriptionMonitoringJob job = new SubscriptionMonitoringJob(common, logVisitor, initiator, statusVariables, count);
+            if(initiator.contains(":")){
+                SubscriptionMonitoringJob job = new SubscriptionMonitoringJob(common, logVisitor, initiator.split(":")[0], initiator.split(":")[1], statusVariables, count);
 
-            common.addJob(job);
+                common.addJob(job);
 
-            logVisitor.info("New Subscription Job is started: " + initiator, null);
-            return job;
+                logVisitor.info("New Subscription Job is started: " + initiator, null);
+                return job;
+            }
+            else {
+                SubscriptionMonitoringJob job = new SubscriptionMonitoringJob(common, logVisitor, initiator, null, statusVariables, count);
+
+                common.addJob(job);
+
+                logVisitor.info("New Subscription Job is started: " + initiator, null);
+                return job;
+            }
         } finally {
             logVisitor.debug("EXIT: startJob: " + initiator, null);
         }
     }
-
+    
     /**
      * Returns the list of currently running <code>MonitoringJob</code>s.
      * Jobs are only visible to callers that have the necessary permissions: to

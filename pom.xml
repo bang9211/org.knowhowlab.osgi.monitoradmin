@@ -23,7 +23,7 @@
 
     <groupId>org.knowhowlab.osgi</groupId>
     <artifactId>monitoradmin</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.4</version>
     <packaging>bundle</packaging>
 
     <name>OSGi MonitorAdmin Implementation</name>
@@ -121,6 +121,11 @@
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-junit4</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.fusesource</groupId>
+            <artifactId>sigar</artifactId>
+            <version>1.6.4</version>
         </dependency>
     </dependencies>
 

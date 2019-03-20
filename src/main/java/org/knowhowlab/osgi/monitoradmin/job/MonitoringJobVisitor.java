@@ -49,5 +49,5 @@ public interface MonitoringJobVisitor {
      * @param statusVariable StatusVariable value
      * @param initiator initiator
      */
-    void fireEvent(String monitorableId, StatusVariable statusVariable, String initiator);
+    void fireEvent(String monitorableId, StatusVariable statusVariable, String jobName, String initiator);
 }

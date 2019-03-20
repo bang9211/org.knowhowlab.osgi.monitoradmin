@@ -83,8 +83,8 @@ class MonitorAdminCommon implements MonitorListener, MonitoringJobVisitor {
         }
         StatusVariablePath path = new StatusVariablePath(monitorableId, statusVariable.getID());
         if (isEventEnabled(path.getPath())) {
-            fireEvent(monitorableId, statusVariable, null);
-            logVisitor.info("Fire new SV update Event: " + path.getPath(), null);
+            fireEvent(monitorableId, statusVariable, null, null);
+            //logVisitor.info("Fire new SV update Event: " + path.getPath(), null);
         }
         // find jobs that handle this StatusVariable update event
         if (!jobs.isEmpty()) {
@@ -280,14 +280,14 @@ class MonitorAdminCommon implements MonitorListener, MonitoringJobVisitor {
      */
     public StatusVariable getStatusVariable(String path)
             throws IllegalArgumentException {
-        logVisitor.debug("ENTRY: getStatusVariable: " + path, null);
+        //logVisitor.debug("ENTRY: getStatusVariable: " + path, null);
         try {
             StatusVariablePath statusVariablePath = new StatusVariablePath(path);
             Monitorable monitorable = findMonitorableById(statusVariablePath.getMonitorableId());
 
             return monitorable.getStatusVariable(statusVariablePath.getStatusVariableId());
         } finally {
-            logVisitor.debug("EXIT: getStatusVariable: " + path, null);
+            //logVisitor.debug("EXIT: getStatusVariable: " + path, null);
         }
     }
 
@@ -391,7 +391,7 @@ class MonitorAdminCommon implements MonitorListener, MonitoringJobVisitor {
      * @param statusVariable status variable
      * @param initiator      initiator. if <code>null</code> - is not added to event
      */
-    public void fireEvent(String monitorableId, StatusVariable statusVariable, String initiator) {
+    public void fireEvent(String monitorableId, StatusVariable statusVariable, String jobName, String initiator) {
         Dictionary<String, String> eventProperties = new Hashtable<String, String>();
         eventProperties.put(ConstantsMonitorAdmin.MON_MONITORABLE_PID, monitorableId);
         eventProperties.put(ConstantsMonitorAdmin.MON_STATUSVARIABLE_NAME, statusVariable.getID());
@@ -412,6 +412,9 @@ class MonitorAdminCommon implements MonitorListener, MonitoringJobVisitor {
                 break;
         }
         eventProperties.put(ConstantsMonitorAdmin.MON_STATUSVARIABLE_VALUE, value);
+        if (jobName != null) {
+            eventProperties.put(ConstantsMonitorAdmin.MON_JOB_NAME, jobName);
+        }
         if (initiator != null) {
             eventProperties.put(ConstantsMonitorAdmin.MON_LISTENER_ID, initiator);
         }

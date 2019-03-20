@@ -37,18 +37,22 @@ public abstract class AbstractMonitoringJob implements MonitoringJob {
     LogVisitor logVisitor;
     // job initiator
     private String initiator;
+    // name of job
+    private String jobName;
     // list of monitoring StatusVariables
     Set<String> statusVariablePaths = new HashSet<String>();
     // job state
     boolean isRunning;
     int schedule = 0;
     int count = 0;
+    boolean isExpired = false;
 
     AbstractMonitoringJob(MonitoringJobVisitor visitor, LogVisitor logVisitor, String initiator,
-                          String[] statusVariablePaths, int schedule, int count) {
+                          String jobName, String[] statusVariablePaths, int schedule, int count) {
         this.visitor = visitor;
         this.logVisitor = logVisitor;
         this.initiator = initiator;
+        this.jobName = jobName;
         this.statusVariablePaths.addAll(Arrays.asList(statusVariablePaths));
         this.schedule = schedule;
         this.count = count;
@@ -56,10 +60,11 @@ public abstract class AbstractMonitoringJob implements MonitoringJob {
     }
 
     AbstractMonitoringJob(MonitoringJobVisitor visitor, LogVisitor logVisitor, String initiator,
-                          String[] statusVariablePaths, int count) {
+                          String jobName, String[] statusVariablePaths, int count) {
         this.visitor = visitor;
         this.logVisitor = logVisitor;
         this.initiator = initiator;
+        this.jobName = jobName;
         this.statusVariablePaths.addAll(Arrays.asList(statusVariablePaths));
         this.count = count;
         this.isRunning = true;
@@ -74,6 +79,10 @@ public abstract class AbstractMonitoringJob implements MonitoringJob {
 
     public String getInitiator() {
         return initiator;
+    }
+    
+    public String getJobName() {
+        return jobName;
     }
 
     public String[] getStatusVariableNames() {
@@ -95,7 +104,11 @@ public abstract class AbstractMonitoringJob implements MonitoringJob {
     public boolean isRunning() {
         return isRunning;
     }
-
+    
+    public boolean IsExpired() {
+        return isExpired;
+    }
+  
     /**
      * Cancel job internaly
      */
@@ -119,7 +132,7 @@ public abstract class AbstractMonitoringJob implements MonitoringJob {
 
     @Override
     public String toString() {
-        return format("%s{{initiator='%s', statusVariablePaths=%s, schedule=%s, count=%s}",
-            getClass().getSimpleName(), initiator, statusVariablePaths, schedule, count);
+        return format("%s{{initiator='%s', jobName='%s', statusVariablePaths=%s, schedule=%s, count=%s}",
+            getClass().getSimpleName(), initiator, jobName, statusVariablePaths, schedule, count);
     }
 }

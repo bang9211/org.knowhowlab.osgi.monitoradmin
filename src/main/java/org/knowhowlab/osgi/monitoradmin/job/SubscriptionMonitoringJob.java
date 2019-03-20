@@ -33,8 +33,8 @@ public class SubscriptionMonitoringJob extends AbstractMonitoringJob {
     private Map<String, Integer> countStatesMap = new HashMap<String, Integer>();
 
     public SubscriptionMonitoringJob(MonitoringJobVisitor visitor, LogVisitor logVisitor, String initiator,
-                                     String[] statusVariablePaths, int count) {
-        super(visitor, logVisitor, initiator, statusVariablePaths, count);
+                                     String jobName, String[] statusVariablePaths, int count) {
+        super(visitor, logVisitor, initiator, jobName, statusVariablePaths, count);
         // initialize counts map
         for (String statusVariablePath : statusVariablePaths) {
             countStatesMap.put(statusVariablePath, 0);
@@ -44,6 +44,7 @@ public class SubscriptionMonitoringJob extends AbstractMonitoringJob {
     @Override
     public void cancel() {
         isRunning = false;
+        isExpired = true;
         logVisitor.info("Job Canceled: " + this, null);
     }
 
@@ -57,7 +58,7 @@ public class SubscriptionMonitoringJob extends AbstractMonitoringJob {
         StatusVariablePath path = new StatusVariablePath(monitorableId, statusVariable.getID());
         int statusVariableChangesCount = countStatesMap.get(path.getPath());
         if ((statusVariableChangesCount + 1) == count) {
-            visitor.fireEvent(monitorableId, statusVariable, getInitiator());
+            visitor.fireEvent(monitorableId, statusVariable, getJobName(), getInitiator());
             countStatesMap.put(path.getPath(), 0);
         } else {
             countStatesMap.put(path.getPath(), statusVariableChangesCount + 1);

@@ -35,15 +35,17 @@ public class ScheduledMonitoringJob extends AbstractMonitoringJob implements Run
     private ExecutorService executorService;
 
     public ScheduledMonitoringJob(MonitoringJobVisitor visitor, LogVisitor logVisitor, String initiator,
-                                  String[] statusVariablePaths, int schedule, int count) {
-        super(visitor, logVisitor, initiator, statusVariablePaths, schedule, count);
+                                  String jobName, String[] statusVariablePaths, int schedule, int count) {
+        super(visitor, logVisitor, initiator, jobName, statusVariablePaths, schedule, count);
         executorService = Executors.newSingleThreadExecutor();
         executorService.submit(this);
     }
+    
 
     @Override
     public void cancel() {
         isRunning = false;
+        isExpired = true;
         executorService.shutdownNow();
         logVisitor.info("Job Canceled: " + this, null);
     }
@@ -66,7 +68,7 @@ public class ScheduledMonitoringJob extends AbstractMonitoringJob implements Run
                     for (String path : statusVariablePaths) {
                         StatusVariablePath statusVariablePath = new StatusVariablePath(path);
                         StatusVariable statusVariable = visitor.getStatusVariable(statusVariablePath.getPath());
-                        visitor.fireEvent(statusVariablePath.getMonitorableId(), statusVariable, getInitiator());
+                        visitor.fireEvent(statusVariablePath.getMonitorableId(), statusVariable, getJobName(), getInitiator());
                     }
                     try {
                         TimeUnit.SECONDS.sleep(schedule);
@@ -78,6 +80,7 @@ public class ScheduledMonitoringJob extends AbstractMonitoringJob implements Run
                     stop();
                 }
             } else {
+                isExpired = true;
                 stop();
             }
         }

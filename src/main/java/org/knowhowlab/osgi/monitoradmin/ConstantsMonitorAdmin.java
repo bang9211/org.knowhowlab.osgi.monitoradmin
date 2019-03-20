@@ -28,6 +28,10 @@ interface ConstantsMonitorAdmin {
      */
     String TOPIC = "org/osgi/service/monitor";
     /**
+     * <code>Job</code> name
+     */
+    String MON_JOB_NAME = "mon.job.name";
+    /**
      * <code>Monitorable</code> ID
      */
     String MON_MONITORABLE_PID = "mon.monitorable.pid";
